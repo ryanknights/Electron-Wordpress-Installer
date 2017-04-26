@@ -8,7 +8,10 @@ const targz = require('targz');
 
 const shell = require('shelljs');
 
-shell.config.execPath = '/Users/ryanknights/.nvm/versions/node/v7.9.0/bin/node';
+shell.config.execPath = '/Users/Ryan/.nvm/versions/node/v7.4.0/bin/node';
+
+const fixPath = require('fix-path');
+fixPath();
 
 const wordpressThemeUrl  = 'https://tmsmedia-ryan@bitbucket.org/tmsmedia/tms-wordpress-starter-theme.git';
 const wordpressPluginUrl = 'https://tmsmedia-ryan@bitbucket.org/tmsmedia/tms-wordpress-plugin.git';

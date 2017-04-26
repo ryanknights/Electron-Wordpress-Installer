@@ -22,7 +22,7 @@ export class InstallComponent implements OnInit {
   ngOnInit() {
   	this.ipcRenderer.on('installationMessage', (event, message) =>
   	{
-  		this.installationMessage = message;
+  		this.installationMessage+= message;
   		this.ref.detectChanges();
   	});
 

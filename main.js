@@ -1,16 +1,19 @@
 const { app, BrowserWindow, ipcMain, dialog } = require('electron');
-const path  = require('path');
-const url   = require('url');
-const http  = require('http');
-const https = require('https');
-const fs    = require('fs');
-const targz = require('targz');
+const path    = require('path');
+const url     = require('url');
+const http    = require('http');
+const https   = require('https');
+const fs      = require('fs');
+const targz   = require('targz');
+
+const fixPath = require('fix-path');
+fixPath();
 
 const shell = require('shelljs');
 
-shell.config.execPath = '/Users/ryanknights/.nvm/versions/node/v7.9.0/bin/node';
+shell.config.execPath = '/Users/Ryan/.nvm/versions/node/v7.4.0/bin/node';
 
-const fork = require('child_process').fork;
+const childProcess = require('child_process');
 let child = null;
 
 // require('electron-reload')(__dirname, {
@@ -56,13 +59,14 @@ app.on('activate', () =>
 
 ipcMain.on('installWordpress', (event, installationPath) =>
 {
-	child = fork('child-install-wordpress.js', ['--installationpath=' + installationPath], {
-		stdio: ['pipe', 'pipe', 'pipe', 'ipc']
+	child = childProcess.fork('./child-install-wordpress.js', ['--installationpath=' + installationPath], {
+		stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
+		cwd: __dirname
 	});
 
 	child.stdout.on('data', (data) => // Needs to be here to stop it crashing because of warnings & output of npm and grunt
 	{
-		//console.log(data.toString());
+		event.sender.send('installationMessage', data.toString());
 	});
 
 	child.on('message', (message) =>
