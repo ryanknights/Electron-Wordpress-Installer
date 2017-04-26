@@ -1,3 +1,30 @@
-<h1>
-  {{title}}
-</h1>
+<div class="window">
+	<header class="toolbar toolbar-header">
+		<h1 class="title">Wordpress Installer</h1>
+	</header>
+	<div class="window-content">
+		<div class="pane-group">
+			<div class="pane-sm sidebar">
+				<nav class="nav-group">
+					<h5 class="nav-group-title">Navigation</h5>
+					<a class="nav-group-item" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+						<span class="icon icon-home"></span>
+						Welcome
+					</a>
+					<a class="nav-group-item" routerLink="/install" routerLinkActive="active">
+						<span class="icon icon-download"></span>
+						Install Wordpress
+					</a>					
+				</nav>								
+			</div>
+			<div class="pane">
+				<div class="padded-more">
+					<router-outlet></router-outlet>
+				</div>
+			</div>
+		</div>
+	</div>
+	<footer class="toolbar toolbar-footer">
+		<h1 class="title">Footer</h1>
+	</footer>
+</div>
