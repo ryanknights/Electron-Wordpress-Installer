@@ -1,3 +1,12 @@
+<div class="page-header">
+	<h1>Install Wordpress</h1>
+</div>
+
+<button (click)="chooseDirectory()">Choose Directory</button>
+<input type="text" class="form-control" [value]="installationFolder" readonly />
+
+<button (click)="installWordpress()" class="btn btn-primary">Install</button>
+
 <p>
-  install works!
+	{{ installationMessage }}
 </p>
