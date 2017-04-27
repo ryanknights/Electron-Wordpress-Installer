@@ -2,11 +2,65 @@
 	<h1>Install Wordpress</h1>
 </div>
 
-<button (click)="chooseDirectory()">Choose Directory</button>
-<input type="text" class="form-control" [value]="installationFolder" readonly />
+<form #f="ngForm" novalidate (ngSubmit)="installWordpress(f)">
 
-<button (click)="installWordpress()" class="btn btn-primary">Install</button>
+	<div class="form-group">
+		<label for="directory">Directory</label>
+		<button (click)="chooseDirectory()" type="button">Choose Directory</button>
+		<input type="text" class="form-control" name="directory" [(ngModel)]="installation.directory" readonly />		
+	</div>
+	<div class="form-group">
+		<label for="dbname">Database Name:</label>
+		<input type="text" [ngModel]="installation.dbname" name="dbname" class="form-control">
+	</div>
+	<div class="form-group">
+		<label for="dbuser">Database User:</label>
+		<input type="text" [ngModel]="installation.dbuser" name="dbuser" class="form-control">
+	</div>	
+	<div class="form-group">
+		<label for="dbpass">Database Password:</label>
+		<input type="text" [ngModel]="installation.dbpass" name="dbpass" class="form-control">
+	</div>	
+	<div class="form-group">
+		<label for="themefoldername">Theme Folder Name:</label>
+		<input type="text" [ngModel]="installation.themefoldername" name="themefoldername" class="form-control">
+	</div>	
+	<div class="form-group">
+		<label for="themedescription">Theme Description:</label>
+		<input type="text" [ngModel]="installation.themedescription" name="themedescription" class="form-control">
+	</div>	
+	<div class="form-group">
+		<label for="themename">Theme Name:</label>
+		<input type="text" [ngModel]="installation.themename" name="themename" class="form-control">
+	</div>
+	<div class="form-group">
+		<label for="siteurl">Site URL:</label>
+		<input type="text" [ngModel]="installation.siteurl" name="siteurl" class="form-control">
+	</div>
+	<div class="form-group">
+		<label for="sitename">Site Name:</label>
+		<input type="text" [ngModel]="installation.sitename" name="sitename" class="form-control">
+	</div>
+	<div class="form-group">
+		<label for="adminuser">Admin Username:</label>
+		<input type="text" [ngModel]="installation.adminuser" name="adminuser" class="form-control">
+	</div>	
+	<div class="form-group">
+		<label for="adminpassword">Admin Password:</label>
+		<input type="text" [ngModel]="installation.adminpassword" name="adminpassword" class="form-control">
+	</div>
+	<div class="form-group">
+		<label for="adminemail">Admin Email:</label>
+		<input type="text" [ngModel]="installation.adminemail" name="adminemail" class="form-control">
+	</div>
+	<div class="form-group">
+		<label for="adminemail">Default Pages (One per line):</label>
+		<textarea [ngModel]="installation.pages" class="form-control" name="pages" placeholder=""></textarea>
+	</div>												
+
+	<button class="btn btn-primary">Install Wordpress</button>
+</form>
 
 <p>
-	{{ installationMessage | json }}
+	{{ installationMessage }}
 </p>

@@ -39,9 +39,11 @@ app.on('ready', createWindow);
 
 app.on('window-all-closed', () =>
 {
-	if (process.platform !== 'darwin')
+	app.quit();
+
+	if (child !== null)
 	{
-		app.quit();
+		child.kill();
 	}
 });
 
@@ -53,27 +55,24 @@ app.on('activate', () =>
 	}
 });
 
-ipcMain.on('installWordpress', (event, installationPath) =>
+ipcMain.on('installWordpress', (event, installationSettings) =>
 {
-	child = childProcess.fork('./child-install-wordpress.js', ['--installationpath=' + installationPath], {
+	child = childProcess.fork('./child-install-wordpress.js', [], {
 		stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
 		cwd: __dirname
+	});	
+
+	child.send({command: 'begin', settings: installationSettings});
+
+	child.stderr.on('data', (data) =>
+	{
+		console.log(data.toString());
 	});
 
-	// child.stdout.on('data', (data) => // Needs to be here to stop it crashing because of warnings & output of npm and grunt
-	// {
-	// 	event.sender.send('installationMessage', data.toString());
-	// });
-
-	// child.stderr.on('data', (data) => // Needs to be here to stop it crashing because of warnings & output of npm and grunt
-	// {
-	// 	event.sender.send('installationMessage', data.toString());
-	// });
-
-	// child.stdin.on('data', (data) => // Needs to be here to stop it crashing because of warnings & output of npm and grunt
-	// {
-	// 	event.sender.send('installationMessage', data.toString());
-	// });		
+	child.stdout.on('data', (data) =>
+	{
+		console.log(data.toString());
+	});	
 
 	child.on('message', (message) =>
 	{

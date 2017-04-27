@@ -17,12 +17,30 @@ export class InstallComponent implements OnInit {
   installationFolder: string = '';
   installationMessage: string = '';
 
-  constructor(private ref: ChangeDetectorRef) { }
+  installation: any = {};
+
+  constructor(private ref: ChangeDetectorRef) { 
+    this.installation =
+    {
+      directory        : '',
+      dbname           : '',
+      dbuser           : 'root',
+      dbpass           : 'root',
+      themefoldername  : '',
+      themedescription : '',
+      themename        : '',
+      siteurl          : 'http://localhost:8888',
+      sitename         : '',
+      adminuser        : 'tmsuser',
+      adminpassword    : '',
+      adminemail       : 'ryan@tms-media.co.uk'
+    }
+  }
 
   ngOnInit() {
   	this.ipcRenderer.on('installationMessage', (event, message) =>
   	{
-  		this.installationMessage+= message;
+  		this.installationMessage = message;
   		this.ref.detectChanges();
   	});
 
@@ -37,20 +55,22 @@ export class InstallComponent implements OnInit {
   			alert('There was a problem installing');
   		}
   		
-  		this.installationMessage = '';
+      this.installationMessage = '';
+      this.installation.directory  = '';
+
   		this.ref.detectChanges();
   	});  	
   }
 
   chooseDirectory () {
-  	this.remote.dialog.showOpenDialog({ properties: ['openDirectory']}, (folder) =>
-	{
-		this.installationFolder = folder[0];
-  		this.ref.detectChanges();
-	});	
+  	this.remote.dialog.showOpenDialog({ properties: ['openDirectory', 'createDirectory']}, (folder) =>
+  	{
+  		this.installation.directory = folder[0];
+    		this.ref.detectChanges();
+  	});	
   }
 
-  installWordpress () {
-  	this.ipcRenderer.send('installWordpress', this.installationFolder);
+  installWordpress ({value, valid}) {
+  	this.ipcRenderer.send('installWordpress', value);
   }
 }
