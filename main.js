@@ -64,15 +64,15 @@ ipcMain.on('installWordpress', (event, installationSettings) =>
 
 	child.send({command: 'begin', settings: installationSettings});
 
-	child.stderr.on('data', (data) =>
-	{
-		console.log(data.toString());
-	});
+	// child.stderr.on('data', (data) =>
+	// {
+	// 	console.log(data.toString());
+	// });
 
-	child.stdout.on('data', (data) =>
-	{
-		console.log(data.toString());
-	});	
+	// child.stdout.on('data', (data) =>
+	// {
+	// 	console.log(data.toString());
+	// });	
 
 	child.on('message', (message) =>
 	{
