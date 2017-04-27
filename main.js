@@ -11,14 +11,10 @@ fixPath();
 
 const shell = require('shelljs');
 
-shell.config.execPath = '/Users/Ryan/.nvm/versions/node/v7.4.0/bin/node';
+shell.config.execPath = shell.which('node').toString();
 
 const childProcess = require('child_process');
 let child = null;
-
-// require('electron-reload')(__dirname, {
-//   electron: path.join(__dirname, 'node_modules', '.bin', 'electron')
-// });
 
 let win;
 
@@ -64,10 +60,20 @@ ipcMain.on('installWordpress', (event, installationPath) =>
 		cwd: __dirname
 	});
 
-	child.stdout.on('data', (data) => // Needs to be here to stop it crashing because of warnings & output of npm and grunt
-	{
-		event.sender.send('installationMessage', data.toString());
-	});
+	// child.stdout.on('data', (data) => // Needs to be here to stop it crashing because of warnings & output of npm and grunt
+	// {
+	// 	event.sender.send('installationMessage', data.toString());
+	// });
+
+	// child.stderr.on('data', (data) => // Needs to be here to stop it crashing because of warnings & output of npm and grunt
+	// {
+	// 	event.sender.send('installationMessage', data.toString());
+	// });
+
+	// child.stdin.on('data', (data) => // Needs to be here to stop it crashing because of warnings & output of npm and grunt
+	// {
+	// 	event.sender.send('installationMessage', data.toString());
+	// });		
 
 	child.on('message', (message) =>
 	{

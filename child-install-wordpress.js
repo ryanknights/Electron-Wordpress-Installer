@@ -1,4 +1,3 @@
-const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path  = require('path');
 const url   = require('url');
 const http  = require('http');
@@ -8,7 +7,7 @@ const targz = require('targz');
 
 const shell = require('shelljs');
 
-shell.config.execPath = '/Users/Ryan/.nvm/versions/node/v7.4.0/bin/node';
+shell.config.execPath = shell.which('node').toString();
 
 const fixPath = require('fix-path');
 fixPath();
@@ -18,10 +17,9 @@ const wordpressPluginUrl = 'https://tmsmedia-ryan@bitbucket.org/tmsmedia/tms-wor
 
 let userOptions =
 {
-	shouldSetupDB: true,
 	dbName: 'test',
 	dbUser: 'root',
-	dbPassword: 'password',
+	dbPassword: 'root',
 	themeFolderName: 'testtheme',
 	themeDescription: 'test theme description',
 	themeName: 'Test',
@@ -29,96 +27,73 @@ let userOptions =
 
 const installationPath = process.argv[2].replace('--installationpath=', '');
 
-return new Promise((resolve, reject) =>
-{
-    let file = fs.createWriteStream(installationPath + '/latest.tar.gz');
+shell.cd(installationPath);
 
-    process.send('Downloading wordpress');
+/*----------  Download  ----------*/
+process.send('Downloading wordpress');
+shell.exec('wp core download')
+process.send('Downloading complete');
 
-    const request = https.get(
-    {
-        host: 'wordpress.org',
-        path: '/latest.tar.gz'
+/*----------  Setup wp_config & install db  ----------*/
+shell.exec(`wp core config --dbname=${userOptions.dbName} --dbuser=${userOptions.dbUser} --dbpass=${userOptions.dbPassword}`);
+process.send('wp_config.php created');
+shell.exec('wp db create');
+process.send('Database created');
 
-    }, (response) =>
-    {
-        response.pipe(file);
+/*----------  Install  ----------*/
+process.send('Installing wordpress');
+shell.exec(`wp core install --url="http://localhost:8888" --title="siteName" --admin_user="tmsuser" --admin_password="password" --admin_email="ryan@tms-media.co.uk"`);
+process.send('Install complete');
 
-        file.on('finish', () => resolve(file));
-        file.on('error', () => reject(err));
-    });
+/*----------  Remove default plugins and themes  ----------*/
+shell.rm('-rf', 'wp-content/plugins/*');
+shell.rm('-rf', 'wp-content/themes/*');
 
-}).then((file) =>
-{
-	process.send('Downloading complete');
-	return file.path;
+/*----------  Install & Activate Starter Theme  ----------*/
+const themeDir = 'wp-content/themes/' + userOptions.themeFolderName;
+process.send('Installing starter theme');
+shell.exec('git clone ' + wordpressThemeUrl + ' ' + themeDir);
+process.send('Setting up theme dependencies and assets');
+shell.cd(themeDir);
+shell.sed('-i', '<!-- themeName -->', userOptions.themeName, 'package.json');
+shell.sed('-i', '<!-- themeDescription -->', userOptions.themeDescription, 'package.json');
+process.send('Installing dependencies');
+shell.exec('npm install --silent');
+process.send('Running grunt setup');
+shell.exec('grunt setup');
+shell.cd('../../../');
+shell.exec(`wp theme activate ${userOptions.themeFolderName}`);
+process.send('Starter theme activated');
 
-}).then((filePath) =>
-{
-	process.send('Unzipping...');
-	return new Promise((resolve, reject) =>
-	{
-	    targz.decompress(
-	    {
-	        src: filePath,
-	        dest: installationPath
+/*----------  Install & Activate Starter Plugin  ----------*/
+process.send('Installing starter plugin');
+shell.exec('git clone ' + wordpressPluginUrl + ' wp-content/plugins/tms-wordpress-plugin');
+shell.exec('wp plugin activate tms-wordpress-plugin');
+process.send('Starter plugin activated');
 
-	    }, (err) =>
-	    {
-	        if (err)
-	        {
-	            return reject(err);
-	        }
+/*----------  Install & activate third party plugins  ----------*/
+process.send('Installing regenerate thumbnails plugin');
+shell.exec('wp plugin install regenerate-thumbnails --activate');
 
-	        resolve(filePath);
-	    });
-	});
+process.send('Installing update urls plugin');
+shell.exec('wp plugin install velvet-blues-update-urls --activate');
 
-}).then((filePath) =>
-{	
-	process.send('Unzipping complete');
-	process.send('Removing latest.tar.gz');
+process.send('Installing ACF Pro plugin');
+shell.exec('wp plugin install http://tms-media.co.uk/plugins/advanced-custom-fields-pro.zip --activate');
 
-	shell.rm('-rf', filePath);
+/*----------  Rewrite URL's  ----------*/
+process.send('Setting up permalinks');
+shell.exec("wp rewrite structure '/%postname%/' --hard");
+shell.exec('wp rewrite flush --hard');
 
-	process.send('Moving files to public_html');
+/*----------  Setup some default options  ----------*/
+process.send('Setting up default options');
+shell.exec('wp option update blog_public 0');
 
-	shell.mv(installationPath + '/wordpress/', installationPath + '/public_html/');
+/*----------  Create default navigation  ----------*/
+process.send('Setting up default navigation');
+shell.exec('wp menu create "Header Navigation"');
+shell.exec('wp menu location assign "Header Navigation" header-navigation');
 
-	shell.cd(installationPath + '/public_html/');
-
-	if (userOptions.shouldSetupDB)
-	{	
-		process.send('Setting up wp_config');
-		shell.mv('wp-config-sample.php', 'wp-config.php');
-		shell.sed('-i', 'database_name_here', userOptions.dbName, 'wp-config.php');
-		shell.sed('-i', 'username_here', userOptions.dbUser, 'wp-config.php');
-		shell.sed('-i', 'password_here', userOptions.dbPassword, 'wp-config.php');			
-	}
-
-	process.send('Removing default plugins');
-	shell.cd('wp-content/plugins/');
-	shell.rm('-f', 'hello.php');
-	shell.rm('-rf', 'akismet');
-	process.send('Downloading TMS Wordpress Plugin');
-	shell.exec('git clone ' + wordpressPluginUrl);
-
-	process.send('Removing default themes');
-	shell.cd('../themes');
-	shell.rm('-rf', '*/');
-	process.send('Installing TMS Theme');
-	shell.exec('git clone ' + wordpressThemeUrl + ' ' + userOptions.themeFolderName);
-	shell.cd(userOptions.themeFolderName);
-	shell.sed('-i', '<!-- themeName -->', userOptions.themeName, 'package.json');
-	shell.sed('-i', '<!-- themeDescription -->', userOptions.themeDescription, 'package.json');
-	process.send('Installing dependencies');
-	shell.exec('npm install --silent');
-	process.send('Running grunt setup');
-	shell.exec('grunt setup');
-
-	process.send('complete');
-
-}).catch((err) =>
-{
-	process.send('failed');	
-});
+/*----------  Complete  ----------*/
+process.send('complete');
