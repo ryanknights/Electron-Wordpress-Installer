@@ -13,8 +13,10 @@ const shell = require('shelljs');
 
 shell.config.execPath = shell.which('node').toString();
 
-const childProcess = require('child_process');
-let child = null;
+let children = 
+{
+	installWordpress: null,
+};
 
 let win;
 
@@ -41,9 +43,13 @@ app.on('window-all-closed', () =>
 {
 	app.quit();
 
-	if (child !== null)
+	for (let child in children)
 	{
-		child.kill();
+		if (children[child] !== null)
+		{
+			children[child].kill();
+			children[child].installWordpress = null;
+		}
 	}
 });
 
@@ -55,40 +61,4 @@ app.on('activate', () =>
 	}
 });
 
-ipcMain.on('installWordpress', (event, installationSettings) =>
-{
-	child = childProcess.fork('./child-install-wordpress.js', [], {
-		stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
-		cwd: __dirname
-	});	
-
-	child.send({command: 'begin', settings: installationSettings});
-
-	// child.stderr.on('data', (data) =>
-	// {
-	// 	console.log(data.toString());
-	// });
-
-	// child.stdout.on('data', (data) =>
-	// {
-	// 	console.log(data.toString());
-	// });	
-
-	child.on('message', (message) =>
-	{
-		if (message === 'complete')
-		{
-			event.sender.send('installationComplete', true);
-			child.kill();
-		}
-		else if (message === 'failed')
-		{
-			event.sender.send('installationComplete', false);
-			child.kill();
-		}
-		else
-		{
-			event.sender.send('installationMessage', message);
-		}
-	});
-});
+ipcMain.on('installWordpress', require('./commands/installWordpress').bind(this, children));

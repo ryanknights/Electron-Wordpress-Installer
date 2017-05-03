@@ -3,7 +3,6 @@ import { Observable } from 'rxjs';
 import { Subject } from 'rxjs/Subject';
 
 declare var electron:any;
-declare var remote:any;
 
 @Component({
   selector: 'app-install',
