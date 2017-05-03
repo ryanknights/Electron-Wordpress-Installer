@@ -30,6 +30,8 @@
     "rxjs": "^5.1.0",
     "shelljs": "^0.7.0",
     "targz": "^1.0.1",
+    "jsonfile": "^2.3.1",
+    "node-horseman": "^3.1.1",    
     "zone.js": "^0.8.4"
   },
   "devDependencies": {

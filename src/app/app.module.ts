@@ -8,12 +8,14 @@ import { routing } from './app.routing';
 import { AppComponent } from './app.component';
 import { HomeComponent } from './home/home.component';
 import { InstallComponent } from './install/install.component';
+import { GoogleCrawlerComponent } from './google-crawler/google-crawler.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     HomeComponent,
-    InstallComponent
+    InstallComponent,
+    GoogleCrawlerComponent
   ],
   imports: [
     BrowserModule,

@@ -62,3 +62,4 @@ app.on('activate', () =>
 });
 
 ipcMain.on('installWordpress', require('./commands/installWordpress').bind(this, children));
+ipcMain.on('crawlGoogle', require('./commands/googleCrawler').bind(this, children));

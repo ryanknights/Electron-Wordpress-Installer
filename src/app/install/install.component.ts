@@ -1,6 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef, Input } from '@angular/core';
-import { Observable } from 'rxjs';
-import { Subject } from 'rxjs/Subject';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 
 declare var electron:any;
 
@@ -13,7 +11,6 @@ export class InstallComponent implements OnInit {
 
   ipcRenderer = electron.ipcRenderer;
   remote      = electron.remote;
-  installationFolder: string = '';
   installationMessage: string = '';
 
   installation: any = {};
